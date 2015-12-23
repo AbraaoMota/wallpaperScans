@@ -17,7 +17,7 @@ Name: SSL_CERT_FILE, Value = C:\RailsInstaller\cacert.pem
 This was my first real attempt at using Ruby on my own. Thanks to the Nokogiri gem for the help with HTML connections & for fNichol for the very useful link above.
 
 
-TODO:
-1) Setup https connections when downloading pictures too
-2) Allow for nice downloads of imgur albums
-3) GUI / Picture selector
+#TODO:
+1. Setup https connections when downloading pictures too
+2. Allow for nice downloads of imgur albums
+3. GUI / Picture selector
