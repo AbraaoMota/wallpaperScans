@@ -13,7 +13,7 @@ $frontPageSize = 70
 
 def grab_html
 	# Defining url
-	startURL = 'https://www.reddit.com/r/wallpapers'
+	startURL = 'https://www.reddit.com/r/earthporn'
 	url = startURL
 	url = URI.parse(url)
 
@@ -104,19 +104,33 @@ def downloadImages(fileLinks)
 	puts 'Making directory for pictures...'
 	FileUtils.mkdir_p("#{File.expand_path(File.dirname(__FILE__))}/pics/")
 
-
-
 	# Counter for the picture
 	picCounter = 1
 	
-	puts 'Downloading images...'
+	
 
 	# Loop through the links of the files, download them into new subdir
 	fileLinks.each{ |fileLink|
 		if (fileLink.include? 'http')
-			File.open("#{File.expand_path(File.dirname(__FILE__))}/pics/#{picCounter}.jpg", 'wb') do |fo|
-			  fo.write open(fileLink.to_s).read 
-			  picCounter += 1	
+			puts 'Get here?'
+			# Ensures https security
+			http = Net::HTTP.new(fileLink.host, fileLink.port)
+			http.use_ssl = true if fileLink.port == $HTTPSPortNum
+			http.verify_mode = OpenSSL::SSL::VERIFY_NONE if fileLink.port == $HTTPSPortNum
+
+			path = fileLink.path
+			path += "?" + fileLink.query unless fileLink.query.nil?
+			res, data = http.get( path )
+			
+			if (res == Net::HTTPSuccess || res == Net::HTTPRedirection)
+				puts 'Downloading image...'
+				File.open("#{File.expand_path(File.dirname(__FILE__))}/pics/#{picCounter}.jpg", 'wb') do |f|
+				  f.write open(fileLink.to_s).read 
+				  picCounter += 1	
+				end
+		    return 1
+		  else
+		    return "failed" + res.to_s
 			end
 		end
  	}
