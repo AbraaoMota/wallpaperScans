@@ -6,6 +6,12 @@ Can also work in theory for other subreddits that are mainly for user submitted 
 # Use
 The following instructions are for use and setup on windows.
 
+RubyInstaller:
+http://rubyinstaller.org/
+
+Installation of the nokogiri gem:
+http://www.nokogiri.org/tutorials/installing_nokogiri.html#windows
+
 You may need to follow these steps to avoid an SSL error:
 https://gist.github.com/fnichol/867550
 
@@ -16,6 +22,9 @@ Name: SSL_CERT_FILE, Value = C:\RailsInstaller\cacert.pem
 
 This was my first real attempt at using Ruby on my own. Thanks to the Nokogiri gem for the help with HTML connections & for fNichol for the very useful link above.
 
+
+### Untested ###
+May work in other environments, see https://www.ruby-lang.org/en/downloads/ for UNIX based systems
 
 #TODO:
 1. Setup https connections when downloading pictures too
