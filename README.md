@@ -18,6 +18,6 @@ This was my first real attempt at using Ruby on my own. Thanks to the Nokogiri g
 
 
 #TODO:
-1. Setup https connections when downloading pictures too
+1. ~~Setup https connections when downloading pictures too~~
 2. Allow for nice downloads of imgur albums
 3. GUI / Picture selector

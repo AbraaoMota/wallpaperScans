@@ -13,7 +13,7 @@ $frontPageSize = 70
 
 def grab_html
 	# Defining url
-	startURL = 'https://www.reddit.com/r/earthporn'
+	startURL = 'https://www.reddit.com/r/wallpapers'
 	url = startURL
 	url = URI.parse(url)
 
@@ -107,8 +107,6 @@ def downloadImages(fileLinks)
 	# Counter for the picture
 	picCounter = 1
 	
-	
-
 	# Loop through the links of the files, download them into new subdir
 	fileLinks.each{ |fileLink|
 		if (fileLink.include? 'http')
