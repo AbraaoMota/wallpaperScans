@@ -112,8 +112,8 @@ def downloadImages(fileLinks)
 	# Loop through the links of the files, download them into new subdir
 	fileLinks.each{ |fileLink|
 		if (fileLink.include? 'http')
-			puts 'Get here?'
 			# Ensures https security
+			fileLink = URI.parse(fileLink)
 			http = Net::HTTP.new(fileLink.host, fileLink.port)
 			http.use_ssl = true if fileLink.port == $HTTPSPortNum
 			http.verify_mode = OpenSSL::SSL::VERIFY_NONE if fileLink.port == $HTTPSPortNum
@@ -122,15 +122,16 @@ def downloadImages(fileLinks)
 			path += "?" + fileLink.query unless fileLink.query.nil?
 			res, data = http.get( path )
 			
-			if (res == Net::HTTPSuccess || res == Net::HTTPRedirection)
-				puts 'Downloading image...'
-				File.open("#{File.expand_path(File.dirname(__FILE__))}/pics/#{picCounter}.jpg", 'wb') do |f|
-				  f.write open(fileLink.to_s).read 
-				  picCounter += 1	
-				end
-		    return 1
-		  else
-		    return "failed" + res.to_s
+			case res
+				  when Net::HTTPSuccess, Net::HTTPRedirection
+						puts "Downloading image number #{picCounter}"
+						File.open("#{File.expand_path(File.dirname(__FILE__))}/pics/#{picCounter}.jpg", 'wb') do |f|
+							#puts fileLink
+					  	f.write open(fileLink.to_s).read 
+					 		picCounter += 1	 
+						end
+				  else
+				    return "failed" + res.to_s
 			end
 		end
  	}
