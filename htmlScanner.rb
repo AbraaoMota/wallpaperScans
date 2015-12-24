@@ -104,19 +104,32 @@ def downloadImages(fileLinks)
 	puts 'Making directory for pictures...'
 	FileUtils.mkdir_p("#{File.expand_path(File.dirname(__FILE__))}/pics/")
 
-
-
 	# Counter for the picture
 	picCounter = 1
 	
-	puts 'Downloading images...'
-
 	# Loop through the links of the files, download them into new subdir
 	fileLinks.each{ |fileLink|
 		if (fileLink.include? 'http')
-			File.open("#{File.expand_path(File.dirname(__FILE__))}/pics/#{picCounter}.jpg", 'wb') do |fo|
-			  fo.write open(fileLink.to_s).read 
-			  picCounter += 1	
+			# Ensures https security
+			fileLink = URI.parse(fileLink)
+			http = Net::HTTP.new(fileLink.host, fileLink.port)
+			http.use_ssl = true if fileLink.port == $HTTPSPortNum
+			http.verify_mode = OpenSSL::SSL::VERIFY_NONE if fileLink.port == $HTTPSPortNum
+
+			path = fileLink.path
+			path += "?" + fileLink.query unless fileLink.query.nil?
+			res, data = http.get( path )
+			
+			case res
+				  when Net::HTTPSuccess, Net::HTTPRedirection
+						puts "Downloading image number #{picCounter}"
+						File.open("#{File.expand_path(File.dirname(__FILE__))}/pics/#{picCounter}.jpg", 'wb') do |f|
+							#puts fileLink
+					  	f.write open(fileLink.to_s).read 
+					 		picCounter += 1	 
+						end
+				  else
+				    return "failed" + res.to_s
 			end
 		end
  	}
