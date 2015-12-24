@@ -19,6 +19,7 @@ As mentioned in the link, it's useful to set the environment variables for more 
 Go to Control Panel -> System & Security -> System -> Advanced System Settings -> Environment Variables -> New -> 
 Name: SSL_CERT_FILE, Value = C:\RailsInstaller\cacert.pem
 
+Once setup finished, just go to directory and call htmlScanner.rb on the command line.
 
 This was my first real attempt at using Ruby on my own. Thanks to the Nokogiri gem for the help with HTML connections & for fNichol for the very useful link above.
 
@@ -30,3 +31,4 @@ May work in other environments, see https://www.ruby-lang.org/en/downloads/ for 
 1. Setup https connections when downloading pictures too
 2. Allow for nice downloads of imgur albums
 3. GUI / Picture selector
+4. Package into an .exe
