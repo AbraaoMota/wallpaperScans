@@ -15,6 +15,8 @@ http://www.nokogiri.org/tutorials/installing_nokogiri.html#windows
 You may need to follow these steps to avoid an SSL error:
 https://gist.github.com/fnichol/867550
 
+You may need Rails Installer: http://railsinstaller.org/en
+
 As mentioned in the link, it's useful to set the environment variables for more than a 1-time use.
 Go to Control Panel -> System & Security -> System -> Advanced System Settings -> Environment Variables -> New -> 
 Name: SSL_CERT_FILE, Value = C:\RailsInstaller\cacert.pem
@@ -22,7 +24,6 @@ Name: SSL_CERT_FILE, Value = C:\RailsInstaller\cacert.pem
 Once setup finished, just go to directory and call htmlScanner.rb on the command line.
 
 This was my first real attempt at using Ruby on my own. Thanks to the Nokogiri gem for the help with HTML connections & for fNichol for the very useful link above.
-
 
 ### Untested ###
 May work in other environments, see https://www.ruby-lang.org/en/downloads/ for UNIX based systems
