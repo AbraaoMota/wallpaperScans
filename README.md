@@ -33,3 +33,4 @@ May work in other environments, see https://www.ruby-lang.org/en/downloads/ for 
 2. Allow for nice downloads of imgur albums
 3. GUI / Picture selector
 4. Package into an .exe
+5. Pass the script through the standards. (Rubocop?)
