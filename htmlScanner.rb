@@ -34,12 +34,12 @@ def grab_html
 	    # parse link
 	    html = open(url)
 			doc = Nokogiri::HTML(html)
-	    
+
 			# Saves html into xml file
 			puts "Loading html from " + startURL + " into htmlFile ..."
 			htmlFile = File.open('html', 'w')
 			File.write(htmlFile, doc)
-			return htmlFile 
+			return htmlFile
 	  else
 	    return "failed" + res.to_s
 	end
@@ -61,7 +61,7 @@ puts 'Parsing wallpaper links....'
 				divCounter = 1
 			end
 
-			if inUserSubmissionSection 
+			if inUserSubmissionSection
 				str = findImages(currentLine)
 				if (str.length > $minimumURLLength)
 					#puts "This is added" + str
@@ -71,12 +71,12 @@ puts 'Parsing wallpaper links....'
 				if (currentLine.include? "<div")
 					divCounter = divCounter + 1
 				end
-			
+
 				if (currentLine.include? "</div>")
 					divCounter = divCounter - 1
 				end
 
-				if divCounter == 0 
+				if divCounter == 0
 					break
 				end
 			end
@@ -92,8 +92,8 @@ def findImages(currentLine)
 		hrefIndex = currentLine.index('href="')
 		firstSpeechMarkIndex = hrefIndex + sizeOfHrefStr
 		secondSpeechMarkIndex = currentLine.index('" tabindex="1"')
-		str = currentLine[firstSpeechMarkIndex+1..secondSpeechMarkIndex-1] 	
-		return str 	
+		str = currentLine[firstSpeechMarkIndex+1..secondSpeechMarkIndex-1]
+		return str
 	end
 	return ""
 end
@@ -106,34 +106,75 @@ def downloadImages(fileLinks)
 
 	# Counter for the picture
 	picCounter = 1
-	
+
 	# Loop through the links of the files, download them into new subdir
 	fileLinks.each{ |fileLink|
+		# Boolean for Albums, if so, download all pictures into subdir
+		isAlbum = 0
+
 		if (fileLink.include? 'http')
+			# Case for imgur albums
+			if ((fileLink.include? 'imgur') && ((fileLink.include? "/a/") || (fileLink.include? "/t/wallpaper")))
+				#puts fileLink
+				fileLink = handleImgurAlbums(fileLink)
+				isAlbum = 1
+				#puts fileLink
+			# Case for imgur single pic
+			elsif ((fileLink.include? 'imgur') && (!fileLink.include? ".jpg"))
+				fileLink = handleImgurSinglePic(fileLink)
+				#puts fileLink
+			end
+
 			# Ensures https security
 			fileLink = URI.parse(fileLink)
 			http = Net::HTTP.new(fileLink.host, fileLink.port)
 			http.use_ssl = true if fileLink.port == $HTTPSPortNum
 			http.verify_mode = OpenSSL::SSL::VERIFY_NONE if fileLink.port == $HTTPSPortNum
-
 			path = fileLink.path
 			path += "?" + fileLink.query unless fileLink.query.nil?
 			res, data = http.get( path )
-			
+
+
 			case res
 				  when Net::HTTPSuccess, Net::HTTPRedirection
 						puts "Downloading image number #{picCounter}"
 						File.open("#{File.expand_path(File.dirname(__FILE__))}/pics/#{picCounter}.jpg", 'wb') do |f|
 							#puts fileLink
-					  	f.write open(fileLink.to_s).read 
-					 		picCounter += 1	 
+					  	f.write open(fileLink.to_s).read
+					 		picCounter += 1
 						end
+					#when isAlbum
+						# Download pics from imgur album
+
 				  else
-				    return "failed" + res.to_s
+						puts fileLink
+						puts "failed" + res.to_s
 			end
+
 		end
  	}
 end
+
+
+def handleImgurSinglePic(fileLink)
+	  if (fileLink.include? "/new")
+			# Removes '/new' link tag
+			#fileLink = fileLink[0..-5]
+			fileLink.slice!("/new")
+		end
+		if (fileLink.include? "/gallery")
+			fileLink.slice!("/gallery")
+			#puts fileLink
+		end
+
+		return fileLink << ".jpg"
+end
+
+def handleImgurAlbums(fileLink)
+	# TODO: Write this method
+	return fileLink
+end
+
 
 
 # execute it all
