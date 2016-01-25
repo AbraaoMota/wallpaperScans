@@ -9,13 +9,13 @@ The following instructions are for use and setup on windows.
 RubyInstaller:
 http://rubyinstaller.org/
 
+Rails: http://railsinstaller.org/en
+
 Installation of the nokogiri gem:
 http://www.nokogiri.org/tutorials/installing_nokogiri.html#windows
 
-You may need to follow these steps to avoid an SSL error:
+Follow these steps to avoid an SSL error:
 https://gist.github.com/fnichol/867550
-
-You may need Rails Installer: http://railsinstaller.org/en
 
 As mentioned in the link, it's useful to set the environment variables for more than a 1-time use.
 Go to Control Panel -> System & Security -> System -> Advanced System Settings -> Environment Variables -> New -> 
