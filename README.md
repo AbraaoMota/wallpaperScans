@@ -30,7 +30,8 @@ May work in other environments, see https://www.ruby-lang.org/en/downloads/ for 
 
 #TODO:
 1. ~~Setup https connections when downloading pictures too~~
-2. Allow for nice downloads of imgur albums
-3. GUI / Picture selector
-4. Package into an .exe
-5. Pass the script through the standards. (Rubocop?)
+2. ~~Nicer single imgur pic relocation link downloads~~
+3. Allow for nice downloads of imgur albums
+4. GUI / Picture selector
+5. Package into an .exe
+6. Pass the script through the standards. (Rubocop?)
