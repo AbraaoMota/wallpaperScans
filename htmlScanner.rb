@@ -6,24 +6,24 @@ require 'openssl'
 require 'fileutils'
 
 
-$minimumURLLength = 6
-$HTTPSPortNum = 443
-$frontPageSize = 70
+$minimum_url_length = 6
+$https_port_num = 443
+$front_page_size = 70
 
-
-def grab_html
+# Argument is for name of file to save html in
+def grab_html(file_name)
 	# Defining url
-	startURL = 'https://www.reddit.com/r/wallpapers'
-	url = startURL
+	start_url = 'https://www.reddit.com/r/wallpapers'
+	url = start_url
 	url = URI.parse(url)
 
 	# Establishing Connection
-	puts "Establishing connection to " + startURL + "...."
+	puts "Establishing connection to " + start_url + "...."
 
 	# Ensures https security
 	http = Net::HTTP.new(url.host, url.port)
-	http.use_ssl = true if url.port == $HTTPSPortNum
-	http.verify_mode = OpenSSL::SSL::VERIFY_NONE if url.port == $HTTPSPortNum
+	http.use_ssl = true if url.port == $https_port_num
+	http.verify_mode = OpenSSL::SSL::VERIFY_NONE if url.port == $https_port_num
 
 
 	path = url.path
@@ -36,118 +36,115 @@ def grab_html
 			doc = Nokogiri::HTML(html)
 
 			# Saves html into xml file
-			puts "Loading html from " + startURL + " into htmlFile ..."
-			htmlFile = File.open('html', 'w')
-			File.write(htmlFile, doc)
-			return htmlFile
+			puts "Loading html from " + start_url + " into #{file_name} ..."
+			html_file = File.open("#{file_name}", 'w')
+			File.write(html_file, doc)
+			return html_file
 	  else
 	    return "failed" + res.to_s
 	end
 end
 
 
-def parse_html (htmlFile)
-inUserSubmissionSection = false
-fileLinks = Array.new($frontPageSize) {String.new}
-divCounter = 0
+def parse_html(html_file)
+in_user_submission_section = false
+file_links = Array.new($front_page_size) {String.new}
+div_counter = 0
 puts 'Parsing wallpaper links....'
 
-	File.open(htmlFile, "r") do |file_handle|
-	  file_handle.each_line do |currentLine|
+	File.open(html_file, "r") do |file_handle|
+	  file_handle.each_line do |current_line|
 	    # if seeing the siteTable div with linklisting, then looking at
 			# the user submissions in the webpage
-			if currentLine.include? '<div id="siteTable" class="sitetable linklisting">'
-				inUserSubmissionSection = true;
-				divCounter = 1
+			if current_line.include? '<div id="siteTable" class="sitetable linklisting">'
+				in_user_submission_section = true;
+				div_counter = 1
 			end
 
-			if inUserSubmissionSection
-				str = findImages(currentLine)
-				if (str.length > $minimumURLLength)
-					#puts "This is added" + str
-					fileLinks.push(str)
+			if in_user_submission_section
+				str = find_images(current_line)
+				if (str.length > $minimum_url_length)
+					file_links.push(str)
 				end
 
-				if (currentLine.include? "<div")
-					divCounter = divCounter + 1
+				if (current_line.include? "<div")
+					div_counter = div_counter + 1
 				end
 
-				if (currentLine.include? "</div>")
-					divCounter = divCounter - 1
+				if (current_line.include? "</div>")
+					div_counter = div_counter - 1
 				end
 
-				if divCounter == 0
+				if (div_counter == 0)
 					break
 				end
 			end
 	  end
 	end
-  return fileLinks
+  return file_links
 end
 
-def findImages(currentLine)
+def find_images(current_line)
 
-	sizeOfHrefStr = 5
-	if currentLine.include? '<p class="title">'
-		hrefIndex = currentLine.index('href="')
-		firstSpeechMarkIndex = hrefIndex + sizeOfHrefStr
-		secondSpeechMarkIndex = currentLine.index('" tabindex="1"')
-		str = currentLine[firstSpeechMarkIndex+1..secondSpeechMarkIndex-1]
+	size_of_href = 5
+	if current_line.include? '<p class="title">'
+		href_index = current_line.index('href="')
+		first_speech_mark_index = href_index + size_of_href
+		second_speech_mark_index = current_line.index('" tabindex="1"')
+		str = current_line[first_speech_mark_index+1..second_speech_mark_index-1]
 		return str
 	end
 	return ""
 end
 
 
-def downloadImages(fileLinks)
+def download_images(file_links)
 	# Make new subdir
 	puts 'Making directory for pictures...'
 	FileUtils.mkdir_p("#{File.expand_path(File.dirname(__FILE__))}/pics/")
 
 	# Counter for the picture
-	picCounter = 1
+	pic_counter = 1
 
 	# Loop through the links of the files, download them into new subdir
-	fileLinks.each{ |fileLink|
+	file_links.each{ |file_link|
 		# Boolean for Albums, if so, download all pictures into subdir
-		isAlbum = 0
+		is_album = 0
 
-		if (fileLink.include? 'http')
+		if (file_link.include? 'http')
 			# Case for imgur albums
-			if ((fileLink.include? 'imgur') && ((fileLink.include? "/a/") || (fileLink.include? "/t/wallpaper")))
-				#puts fileLink
-				fileLink = handleImgurAlbums(fileLink)
-				isAlbum = 1
-				#puts fileLink
+			if ((file_link.include? 'imgur') && ((file_link.include? "/a/") || (file_link.include? "/t/wallpaper")))
+				file_link = handle_imgur_album(file_link)
+				is_album = 1
 			# Case for imgur single pic
-			elsif ((fileLink.include? 'imgur') && (!fileLink.include? ".jpg"))
-				fileLink = handleImgurSinglePic(fileLink)
-				#puts fileLink
+		elsif ((file_link.include? 'imgur') && (!file_link.include? ".jpg"))
+				file_link = handle_imgur_single_pic(file_link)
+				#puts file_link
 			end
 
 			# Ensures https security
-			fileLink = URI.parse(fileLink)
-			http = Net::HTTP.new(fileLink.host, fileLink.port)
-			http.use_ssl = true if fileLink.port == $HTTPSPortNum
-			http.verify_mode = OpenSSL::SSL::VERIFY_NONE if fileLink.port == $HTTPSPortNum
-			path = fileLink.path
-			path += "?" + fileLink.query unless fileLink.query.nil?
+			file_link = URI.parse(file_link)
+			http = Net::HTTP.new(file_link.host, file_link.port)
+			http.use_ssl = true if file_link.port == $https_port_num
+			http.verify_mode = OpenSSL::SSL::VERIFY_NONE if file_link.port == $https_port_num
+			path = file_link.path
+			path += "?" + file_link.query unless file_link.query.nil?
 			res, data = http.get( path )
 
 
 			case res
 				  when Net::HTTPSuccess, Net::HTTPRedirection
-						puts "Downloading image number #{picCounter}"
-						File.open("#{File.expand_path(File.dirname(__FILE__))}/pics/#{picCounter}.jpg", 'wb') do |f|
-							#puts fileLink
-					  	f.write open(fileLink.to_s).read
-					 		picCounter += 1
+						puts "Downloading image number #{pic_counter}"
+						File.open("#{File.expand_path(File.dirname(__FILE__))}/pics/#{pic_counter}.jpg", 'wb') do |f|
+							#puts file_link
+					  	f.write open(file_link.to_s).read
+					 		pic_counter += 1
 						end
-					#when isAlbum
+					#when is_album
 						# Download pics from imgur album
 
 				  else
-						puts fileLink
+						puts file_link
 						puts "failed" + res.to_s
 			end
 
@@ -156,28 +153,32 @@ def downloadImages(fileLinks)
 end
 
 
-def handleImgurSinglePic(fileLink)
-	  if (fileLink.include? "/new")
-			# Removes '/new' link tag
-			#fileLink = fileLink[0..-5]
-			fileLink.slice!("/new")
+def handle_imgur_single_pic(file_link)
+	  # Removes '/new' link tag
+	  if (file_link.include? "/new")
+			file_link.slice!("/new")
 		end
-		if (fileLink.include? "/gallery")
-			fileLink.slice!("/gallery")
-			#puts fileLink
+		# Removes '/gallery' link tag
+		if (file_link.include? "/gallery")
+			file_link.slice!("/gallery")
 		end
 
-		return fileLink << ".jpg"
+		return file_link << ".jpg"
 end
 
-def handleImgurAlbums(fileLink)
-	# TODO: Write this method
-	return fileLink
+#def parse
+
+def handle_imgur_album(file_link)
+	# Place html of page into equivalent file
+	#file = grab_html(file_link)
+	#links = parse_albums(file)
+
+	return file_link
 end
 
 
 
 # execute it all
-file = grab_html
+file = grab_html("htmlFile")
 links = parse_html(file)
-downloadImages(links)
+download_images(links)
