@@ -108,14 +108,12 @@ def download_images(file_links)
 
 	# Loop through the links of the files, download them into new subdir
 	file_links.each{ |file_link|
-		# Boolean for Albums, if so, download all pictures into subdir
-		is_album = 0
 
 		if (file_link.include? 'http')
 			# Case for imgur albums
 			if ((file_link.include? 'imgur') && ((file_link.include? "/a/") || (file_link.include? "/t/wallpaper")))
 				file_link = handle_imgur_album(file_link)
-				is_album = 1
+				next
 			# Case for imgur single pic
 		elsif ((file_link.include? 'imgur') && (!file_link.include? ".jpg"))
 				file_link = handle_imgur_single_pic(file_link)
@@ -166,13 +164,46 @@ def handle_imgur_single_pic(file_link)
 		return file_link << ".jpg"
 end
 
-#def parse
+def parse_albums(file)
+	in_user_submission_section = false
+	file_links = Array.new($front_page_size) {String.new}
+	puts "Parsing wallpaper links for album at #{file}"
+	File.open(file, "r") do |file_handle|
+		file_handle.each_line do |current_line|
+
+			if current_line.include? 'meta property="og:image"'
+				in_user_submission_section = true;
+			end
+
+			if in_user_submission_section
+				str = find_album_images(current_line)
+				if (str.length > $minimum_url_length)
+					file_links.push(str)
+				end
+			end
+		end
+	end
+end
+
+def find_album_images(current_line)
+	size_of_content = 8
+	if current_line.include? 'content="'
+		content_index = current_line.index('content')
+		first_speech_mark_index = content_index + size_of_content
+		second_speech_mark_index = current_line.index('" />')
+		str = current_line[first_speech_mark_index + 1..second_speech_mark_index - 1]
+		return str
+	end
+	return ""
+end
+
+
 
 def handle_imgur_album(file_link)
 	# Place html of page into equivalent file
-	#file = grab_html(file_link)
-	#links = parse_albums(file)
-
+	file = grab_html(file_link)
+	links = parse_albums(file)
+	download_images(links)
 	return file_link
 end
 
