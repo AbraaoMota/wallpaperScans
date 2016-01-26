@@ -1,4 +1,4 @@
-# wallpaperScans
+# wallpaper_scans
 This directory contains a simple script in Ruby that scans through the front-page of the wallpapers subreddit on reddit and downloads all of those in the 1st page. Places them in a subdirectory called pics, relative to the position of the script.
 Can also work in theory for other subreddits that are mainly for user submitted pictures.
 ####Update 260116
