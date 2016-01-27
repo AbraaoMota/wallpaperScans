@@ -23,8 +23,8 @@ As mentioned in the link, it's useful to set the environment variables for more 
 Go to Control Panel -> System & Security -> System -> Advanced System Settings -> Environment Variables -> New -> 
 Name: SSL_CERT_FILE, Value = C:\RailsInstaller\cacert.pem
 
-Once setup finished, just go to directory and call `ruby htmlScanner.rb {optional-url}` on the command line.
-This defaults  to downloading the current pictures at /r/walpaper. Alternatively, provide an optional url to attempt to download pictures from here.
+Once setup finished, just go to directory and call `ruby htmlScanner.rb {"optional-url"}` on the command line. Ensure the optional url is surrounded by speech marks `""`.
+If this argument is not provided, the script defaults to downloading from the latest at [`/r/wallpapers`](https://www.reddit.com/r/wallpapers/). Alternatively, provide an optional url to attempt to download pictures from here.
 
 This was my first real attempt at using Ruby on my own, and it's not the most elegant solution as of yet. Thanks to the Nokogiri gem for the help with HTML connections & for fNichol for the very useful link above.
 
