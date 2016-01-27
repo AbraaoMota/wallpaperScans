@@ -5,21 +5,32 @@ require 'nokogiri'
 require 'openssl'
 require 'fileutils'
 
-$arg_1 = ARGV[0]
-$download_url = ($arg_1 == nil) ? "https://www.reddit.com/r/wallpapers/" : $arg_1
-$url_is_complex = $download_url.include?("/?")
-$url_based_dir = $url_is_complex ?
-								 $download_url[$download_url.index("/r/")+3..$download_url.index("/?")] << $download_url[-9..-1]
-								 :
-								 "r_" << $download_url[$download_url.index("/r/")+3..-2]
+$arg_0 = ARGV[0]
+$download_url = "https://www.reddit.com/r/wallpapers/"
+$url_based_dir = "r_" << $download_url[$download_url.index("/r/")+3..-2]
+
 $minimum_url_length = 6
 $https_port_num = 443
 $front_page_size = 70
 $max_album_size = 15
+
 $time = Time.new
 $today =  $time.strftime("%d-%m-%Y")
 $root_dir = "#{File.expand_path(File.dirname(__FILE__))}/"
-$pic_dir = "#{$root_dir}pics/#{$today}/#{$url_based_dir}"
+$pic_dir = "#{$root_dir}pics/#{$today}/"
+
+def arg_options()
+	if (!($arg_0 == "") && !($arg_0 == nil))
+		$download_url = $arg_0
+	end
+
+	if ($download_url.include?("/?"))
+		$url_based_dir = $download_url[$download_url.index("/r/")+3..$download_url.index("/?")-2] << "/" << $download_url[-9..-1]
+	end
+
+	$pic_dir = "#{$root_dir}pics/#{$today}/#{$url_based_dir}"
+
+end
 
 # Argument is for name of file to save html in
 def grab_html(start_url, file_name, dir)
@@ -167,7 +178,6 @@ def download_images(file_links, dir, in_album)
 						puts file_link
 						puts "failed" + res.to_s
 			end
-
 		end
  	}
 end
@@ -236,6 +246,8 @@ end
 
 
 # execute it all
+arg_options()
+#puts $url_based_dir
 file = grab_html($download_url, "reddit", $root_dir)
 links = parse_html(file)
 download_images(links, "#{$pic_dir}", false)
