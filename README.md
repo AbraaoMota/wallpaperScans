@@ -1,5 +1,5 @@
 # wallpaper_scans
-This directory contains a simple script in Ruby that scans through the front-page of the wallpapers subreddit on reddit and downloads all of those in the 1st page. Places all pictures in a `/pics/{todays-date}/{url-dependent-name}` directory, with relative positioning to the script.
+This directory contains a simple script in Ruby that scans through the front-page of the wallpapers subreddit on reddit and downloads all of those in the 1st page. Places all pictures in a `/pics/{todays-date}/{url-dependent-name}` directory, with relative positioning to the script. The script supports imgur album downloads, and is capped at 15 pictures per album. This can be changed.
 Can also work in theory for other subreddits that are mainly for user submitted pictures.
 ####Update 260116
 Can now also download imgur albums nicely, places them in folders in the pics folder. 
