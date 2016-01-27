@@ -10,9 +10,10 @@ $minimum_url_length = 6
 $https_port_num = 443
 $front_page_size = 70
 $max_album_size = 15
+$time = Time.new
+$today =  $time.strftime("%d-%m-%Y")
 $root_dir = "#{File.expand_path(File.dirname(__FILE__))}/"
-$pic_dir = "#{$root_dir}pics/"
-
+$pic_dir = "#{$root_dir}pics/#{$today}"
 
 # Argument is for name of file to save html in
 def grab_html(start_url, file_name, dir)
@@ -20,6 +21,7 @@ def grab_html(start_url, file_name, dir)
 	url = URI.parse(url)
 
 	# Establishing Connection
+	#puts $today
 	puts "Establishing connection to " + start_url + "...."
 
 	# Ensures https security
