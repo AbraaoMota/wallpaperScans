@@ -5,7 +5,8 @@ require 'nokogiri'
 require 'openssl'
 require 'fileutils'
 
-$download_url = "https://www.reddit.com/r/wallpapers/"
+$arg_1 = ARGV[0]
+$download_url = ($arg_1 == nil) ? "https://www.reddit.com/r/wallpapers/" : $arg_1
 $url_is_complex = $download_url.include?("/?")
 $url_based_dir = $url_is_complex ?
 								 $download_url[$download_url.index("/r/")+3..$download_url.index("/?")] << $download_url[-9..-1]
