@@ -5,7 +5,12 @@ require 'nokogiri'
 require 'openssl'
 require 'fileutils'
 
-
+$download_url = "https://www.reddit.com/r/wallpapers/"
+$url_is_complex = $download_url.include?("/?")
+$url_based_dir = $url_is_complex ?
+								 $download_url[$download_url.index("/r/")+3..$download_url.index("/?")] << $download_url[-9..-1]
+								 :
+								 "r_" << $download_url[$download_url.index("/r/")+3..-2]
 $minimum_url_length = 6
 $https_port_num = 443
 $front_page_size = 70
@@ -13,7 +18,7 @@ $max_album_size = 15
 $time = Time.new
 $today =  $time.strftime("%d-%m-%Y")
 $root_dir = "#{File.expand_path(File.dirname(__FILE__))}/"
-$pic_dir = "#{$root_dir}pics/#{$today}"
+$pic_dir = "#{$root_dir}pics/#{$today}/#{$url_based_dir}"
 
 # Argument is for name of file to save html in
 def grab_html(start_url, file_name, dir)
@@ -21,14 +26,12 @@ def grab_html(start_url, file_name, dir)
 	url = URI.parse(url)
 
 	# Establishing Connection
-	#puts $today
-	puts "Establishing connection to " + start_url + "....\n\n"
+	puts "\nEstablishing connection to #{start_url} ....\n\n"
 
 	# Ensures https security
 	http = Net::HTTP.new(url.host, url.port)
 	http.use_ssl = true if url.port == $https_port_num
 	http.verify_mode = OpenSSL::SSL::VERIFY_NONE if url.port == $https_port_num
-
 
 	path = url.path
 	path += "?" + url.query unless url.query.nil?
@@ -40,7 +43,7 @@ def grab_html(start_url, file_name, dir)
 			doc = Nokogiri::HTML(html)
 
 			# Saves as html file
-			puts "Loading html from " + start_url + " into #{file_name}_html ...\n\n"
+			puts "Loading html from #{start_url} into #{file_name}_html ...\n\n"
 
 			html_file = File.open("#{dir}#{file_name}_html", 'w')
 			File.write(html_file, doc)
@@ -104,7 +107,7 @@ end
 
 def download_images(file_links, dir, in_album)
 	# Make new subdir
-	puts 'Making directory for pictures...'
+	puts "Making directory #{dir} for " + (in_album ? "album " : "") + "pictures...\n\n"
 	FileUtils.mkdir_p(dir)
 
 	# Counter for the picture
@@ -112,6 +115,9 @@ def download_images(file_links, dir, in_album)
 
 	# Album counter
 	albums = 1
+
+	# Png support bool
+	is_png = false
 
 	# Loop through the links of the files, download them into new subdir
 	file_links.each{ |file_link|
@@ -127,6 +133,10 @@ def download_images(file_links, dir, in_album)
 				end
 			end
 
+			if (file_link.include? "png")
+				is_png = true;
+			end
+
 			# Ensures https security
 			file_link = URI.encode(file_link)
 			file_link = URI.parse(file_link)
@@ -140,9 +150,17 @@ def download_images(file_links, dir, in_album)
 
 			case res
 				  when Net::HTTPSuccess, Net::HTTPRedirection
+						if (is_png)
+							File.open("#{dir}/#{pic_counter}.png", 'wb') do |f|
+						  	f.write open(file_link.to_s).read
+						 		pic_counter += 1
+							end
+							is_png = false;
+						else
 							File.open("#{dir}/#{pic_counter}.jpg", 'wb') do |f|
 						  	f.write open(file_link.to_s).read
 						 		pic_counter += 1
+							end
 						end
 				  else
 						puts file_link
@@ -169,8 +187,7 @@ end
 def parse_albums(file, albums)
 	in_user_submission_section = false
 	file_links = Array.new($max_album_size) {String.new}
-	puts "Parsing wallpaper links for album at #{$pic_dir}#{albums}_html"
-	puts "Opening: #{$pic_dir}#{albums}_html"
+	puts "Parsing wallpaper links for album at #{$pic_dir}#{albums}_html ....\n\n"
 	File.open(file, "r") do |file_handle|
 		file_handle.each_line do |current_line|
 			if current_line.include? 'meta property="og:image"'
@@ -218,8 +235,9 @@ end
 
 
 # execute it all
-file = grab_html('https://www.reddit.com/r/wallpapers/?count=25&after=t3_42jxly', "reddit", $root_dir)
+file = grab_html($download_url, "reddit", $root_dir)
 links = parse_html(file)
 download_images(links, "#{$pic_dir}", false)
-puts "Deleting html files"
+puts "Deleting all '_html' files\n\n"
 `DEL /S /F *_html.*`
+puts "Finished, enjoy the pictures!\n"
