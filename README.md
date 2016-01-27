@@ -1,6 +1,8 @@
-# wallpaperScans
+# wallpaper_scans
 This directory contains a simple script in Ruby that scans through the front-page of the wallpapers subreddit on reddit and downloads all of those in the 1st page. Places them in a subdirectory called pics, relative to the position of the script.
 Can also work in theory for other subreddits that are mainly for user submitted pictures.
+####Update 260116
+Can now also download imgur albums nicely, places them in folders in the pics folder. 
 
 
 # Use
@@ -31,7 +33,7 @@ May work in other environments, see https://www.ruby-lang.org/en/downloads/ for 
 #TODO:
 1. ~~Setup https connections when downloading pictures too~~
 2. ~~Nicer single imgur pic relocation link downloads~~
-3. Allow for nice downloads of imgur albums
+3. ~~Allow for nice downloads of imgur albums~~
 4. GUI / Picture selector
 5. Package into an .exe
 6. Pass the script through the standards. (Rubocop?)
