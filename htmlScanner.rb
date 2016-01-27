@@ -22,7 +22,7 @@ def grab_html(start_url, file_name, dir)
 
 	# Establishing Connection
 	#puts $today
-	puts "Establishing connection to " + start_url + "...."
+	puts "Establishing connection to " + start_url + "....\n\n"
 
 	# Ensures https security
 	http = Net::HTTP.new(url.host, url.port)
@@ -40,8 +40,8 @@ def grab_html(start_url, file_name, dir)
 			doc = Nokogiri::HTML(html)
 
 			# Saves as html file
-			puts "Loading html from " + start_url + " into #{file_name}_html ..."
-			puts "placing html_file in : #{dir}#{file_name}_html"
+			puts "Loading html from " + start_url + " into #{file_name}_html ...\n\n"
+
 			html_file = File.open("#{dir}#{file_name}_html", 'w')
 			File.write(html_file, doc)
 			return html_file
@@ -54,7 +54,7 @@ def parse_html(html_file)
 	in_user_submission_section = false
 	file_links = Array.new($front_page_size) {String.new}
 	div_counter = 0
-	puts 'Parsing wallpaper links....'
+	puts "Parsing wallpaper links....\n\n"
 
 	File.open(html_file, "r") do |file_handle|
 	  file_handle.each_line do |current_line|
@@ -85,6 +85,7 @@ def parse_html(html_file)
 			end
 	  end
 	end
+	html_file.close
   return file_links
 end
 
@@ -165,12 +166,12 @@ def handle_imgur_single_pic(file_link)
 		return file_link << ".jpg"
 end
 
-def parse_albums(albums)
+def parse_albums(file, albums)
 	in_user_submission_section = false
 	file_links = Array.new($max_album_size) {String.new}
 	puts "Parsing wallpaper links for album at #{$pic_dir}#{albums}_html"
 	puts "Opening: #{$pic_dir}#{albums}_html"
-	File.open("#{$pic_dir}#{albums}_html", "r") do |file_handle|
+	File.open(file, "r") do |file_handle|
 		file_handle.each_line do |current_line|
 			if current_line.include? 'meta property="og:image"'
 				in_user_submission_section = true;
@@ -186,6 +187,7 @@ def parse_albums(albums)
 			end
 		end
 	end
+  file.close
 	return file_links
 end
 
@@ -209,7 +211,7 @@ end
 def handle_imgur_album(file_link, albums)
 	# Place html of page into equivalent file
 	file = grab_html(file_link, "#{albums}", $pic_dir)
-	links = parse_albums(albums)
+	links = parse_albums(file, albums)
 	download_images(links, "#{$pic_dir}/#{albums}", true)
 	return file_link
 end
@@ -219,3 +221,5 @@ end
 file = grab_html('https://www.reddit.com/r/wallpapers/?count=25&after=t3_42jxly', "reddit", $root_dir)
 links = parse_html(file)
 download_images(links, "#{$pic_dir}", false)
+puts "Deleting html files"
+`DEL /S /F *_html.*`
